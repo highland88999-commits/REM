@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nunavut Community Directory</title>
+    <style>
+        :root { 
+            --primary: #00f2ff; /* Frost Cyan */
+            --secondary: #ffffff; /* Arctic White */
+            --accent: #ffd700; /* Midnight Sun Gold */
+            --bg: #010409; 
+            --glow: rgba(0, 242, 255, 0.4);
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Segoe UI', sans-serif; color: white; }
+
+        /* --- ARCTIC SYNTHWAVE BACKGROUND --- */
+        .sky {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60%;
+            background: linear-gradient(to bottom, #010409 0%, #001a33 60%, #00f2ff11 100%);
+            z-index: -3;
+        }
+
+        .sun {
+            position: fixed; bottom: 30%; left: 50%; transform: translateX(-50%);
+            width: min(280px, 55vw); height: min(280px, 55vw); 
+            background: linear-gradient(var(--secondary), var(--primary));
+            border-radius: 50%; box-shadow: 0 0 50px var(--primary); z-index: -2;
+            mask-image: linear-gradient(to bottom, black 50%, transparent 52%, black 54%, transparent 56%, black 58%, transparent 60%, black 62%);
+            animation: sunPulse 7s ease-in-out infinite;
+        }
+
+        @keyframes sunPulse { 0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); } 50% { opacity: 0.6; transform: translateX(-50%) scale(1.02); } }
+
+        .grid {
+            position: fixed; bottom: 0; left: -50%; width: 200%; height: 50%;
+            background-image: 
+                linear-gradient(0deg, transparent 24%, var(--secondary) 25%, var(--secondary) 26%, transparent 27%, transparent 74%, var(--secondary) 75%, var(--secondary) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, var(--secondary) 25%, var(--secondary) 26%, transparent 27%, transparent 74%, var(--secondary) 75%, var(--secondary) 76%, transparent 77%, transparent);
+            background-size: 70px 70px;
+            transform: perspective(400px) rotateX(70deg);
+            animation: gridFlow 6s linear infinite;
+            z-index: -1; opacity: 0.1;
+        }
+
+        @keyframes gridFlow { from { background-position: 0 0; } to { background-position: 0 70px; } }
+
+        canvas#stars { position: fixed; top: 0; left: 0; z-index: -4; }
+
+        /* --- INTERFACE --- */
+        .container { 
+            position: relative; max-width: 650px; margin: 80px auto 30px; 
+            background: rgba(1, 4, 9, 0.8); 
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            padding: 25px; border-radius: 16px; border: 1px solid rgba(0, 242, 255, 0.2);
+            height: calc(100vh - 110px); display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(0, 242, 255, 0.05);
+        }
+
+        h1 { text-align: center; color: var(--secondary); text-shadow: 0 0 20px var(--primary); margin: 0 0 20px; font-size: 1.8em; letter-spacing: 6px; font-weight: 900; }
+
+        /* Top Search Bar */
+        .search-wrapper {
+            position: sticky; top: 0; z-index: 10; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+            padding: 15px 0; border-bottom: 1px solid rgba(0, 242, 255, 0.2); margin-bottom: 15px;
+        }
+
+        .search-bar { 
+            width: 100%; padding: 14px 18px; background: rgba(255,255,255,0.03); 
+            border: 2px solid var(--primary); border-radius: 12px; color: white; 
+            font-size: 1.1em; outline: none; box-shadow: 0 0 15px rgba(0,242,255,0.3);
+            transition: all 0.3s;
+        }
+
+        .search-bar:focus {
+            border-color: var(--accent); box-shadow: 0 0 25px rgba(255,215,0,0.5);
+        }
+
+        #townList { flex-grow: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
+        .town-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 16px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+            transition: background 0.2s;
+        }
+        .town-item:hover { background: rgba(0,242,255,0.08); }
+        .type-tag { font-size: 0.65em; padding: 2px 8px; border-radius: 12px; background: rgba(0, 242, 255, 0.05); color: var(--primary); border: 1px solid var(--primary); margin-top: 5px; display: inline-block; text-transform: uppercase; letter-spacing: 1px; }
+
+        .map-btn { 
+            background: rgba(255,255,255,0.1); color: white; text-decoration: none; 
+            padding: 8px 18px; border-radius: 6px; font-size: 0.8em; font-weight: bold;
+            border: 1px solid var(--primary); transition: 0.3s;
+        }
+        .map-btn:hover { background: var(--primary); color: var(--bg); box-shadow: 0 0 20px var(--primary); }
+
+        /* Back Button */
+        .back-btn {
+            position: absolute; top: 20px; left: 20px; z-index: 20;
+            background: rgba(0,242,255,0.2); color: var(--primary);
+            border: 1px solid var(--primary); padding: 10px 18px; border-radius: 8px;
+            cursor: pointer; font-weight: bold; text-decoration: none;
+            transition: all 0.3s;
+        }
+        .back-btn:hover { background: var(--accent); color: black; box-shadow: 0 0 20px var(--accent); }
+    </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="sky"></div>
+<div class="sun"></div>
+<div class="grid"></div>
+
+<!-- Back to Main Selector -->
+<a href="../index.html" class="back-btn">← Back to Provinces</a>
+
+<div class="container">
+    <h1>NUNAVUT</h1>
+
+    <!-- Search Bar -->
+    <div class="search-wrapper">
+        <input type="text" id="searchInput" class="search-bar" placeholder="SEARCH IQALUIT, HAMLETS..." onkeyup="debouncedFilter()">
+    </div>
+
+    <div id="townList"></div>
+</div>
+
+<script>
+// === DEBOUNCE FOR SMOOTH SEARCH ===
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+const debouncedFilter = debounce(filterTowns, 300);
+
+// === FULL NUNAVUT COMMUNITIES ===
+const province = "Nunavut";
+const locations = [
+    // CITY
+    {name: "Iqaluit", type: "City"},
+    // HAMLETS
+    {name: "Arctic Bay", type: "Hamlet"}, {name: "Arviat", type: "Hamlet"}, {name: "Baker Lake", type: "Hamlet"}, {name: "Cambridge Bay", type: "Hamlet"}, {name: "Cape Dorset (Kinngait)", type: "Hamlet"}, {name: "Chesterfield Inlet", type: "Hamlet"}, {name: "Clyde River", type: "Hamlet"}, {name: "Coral Harbour", type: "Hamlet"}, {name: "Gjoa Haven", type: "Hamlet"}, {name: "Grise Fiord", type: "Hamlet"}, {name: "Hall Beach (Sanirajak)", type: "Hamlet"}, {name: "Igloolik", type: "Hamlet"}, {name: "Kugaaruk", type: "Hamlet"}, {name: "Kugluktuk", type: "Hamlet"}, {name: "Naujaat", type: "Hamlet"}, {name: "Pangnirtung", type: "Hamlet"}, {name: "Pond Inlet", type: "Hamlet"}, {name: "Qikiqtarjuaq", type: "Hamlet"}, {name: "Rankin Inlet", type: "Hamlet"}, {name: "Resolute", type: "Hamlet"}, {name: "Sanikiluaq", type: "Hamlet"}, {name: "Taloyoak", type: "Hamlet"}, {name: "Whale Cove", type: "Hamlet"}, {name: "Kimmirut", type: "Hamlet"}
+];
+
+// === STARFIELD ANIMATION ===
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function initStars() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    stars = [];
+    for(let i=0; i<100; i++) {
+        stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*2, speed: Math.random()*0.05 });
+    }
+}
+
+function animateStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white";
+    stars.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
+        ctx.fill();
+        s.y += s.speed;
+        if(s.y > canvas.height) s.y = 0;
+    });
+    requestAnimationFrame(animateStars);
+}
+
+// === RENDER COMMUNITIES ===
+function render(data) {
+    const list = document.getElementById('townList');
+    list.innerHTML = data.map(item => `
+        <div class="town-item">
+            <div>
+                <div style="font-weight:600; font-size: 1.1em; letter-spacing: 0.5px;">${item.name}</div>
+                <div class="type-tag">${item.type}</div>
+            </div>
+            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ', ' + province + ', Canada')}" target="_blank" class="map-btn">VIEW MAP</a>
+        </div>
+    `).join('');
+}
+
+// === FILTER FUNCTION ===
+function filterTowns() {
+    const term = document.getElementById('searchInput').value.toLowerCase().trim();
+    const filtered = locations.filter(loc => 
+        loc.name.toLowerCase().includes(term) || 
+        loc.type.toLowerCase().includes(term)
+    );
+    render(filtered.length ? filtered : locations);
+}
+
+// === INIT ===
+window.addEventListener('resize', initStars);
+initStars();
+animateStars();
+render(locations);
+</script>
+
+</body>
+</html>
