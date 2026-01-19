@@ -1,1 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Vortex - Provinces ⚡❤️💎</title>
+    <style>
+        /* Your existing styles — unchanged, just keeping them here for completeness */
+        body {
+            background: #000;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+        }
+        .slider {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 20px;
+            gap: 100px;
+        }
+        .card {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.5s ease;
+        }
+        .card:hover {
+            transform: scale(1.03);
+        }
+        .card img {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border-radius: 25px;
+            box-shadow: 0 0 40px #0ff, 0 0 60px #f0f;
+            border: 2px solid #333;
+        }
+        .card button {
+            margin-top: 35px;
+            background: #f0f; 
+            color: #000;
+            border: none;
+            padding: 20px 10px;
+            font-size: clamp(1.2em, 5vw, 1.8em);
+            font-weight: 900;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 0 35px #f0f;
+            transition: 0.4s ease;
+            width: 90%;
+            max-width: 500px;
+            text-transform: uppercase;
+        }
+        .card button:hover {
+            background: #0ff;
+            box-shadow: 0 0 55px #0ff;
+            color: #000;
+        }
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+        .nav-button {
+            background: linear-gradient(45deg, #f0f, #ff00ff);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.4em;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 0 40px #f0f;
+            transition: 0.4s ease;
+        }
+        .nav-button:hover {
+            background: linear-gradient(45deg, #0ff, #00ffff);
+            box-shadow: 0 0 60px #0ff;
+            transform: scale(1.1);
+        }
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body>
 
+    <div class="slider">
+        <!-- Alberta -->
+        <div class="card">
+            <img src="https://dl.dropboxusercontent.com/scl/fi/azyu3fs053a5afuijs41d/1000028568.jpg?rlkey=1z34pl8wm8cd63d6e6nkmg1ei&raw=1" alt="Alberta">
+            <button onclick="window.location.href='alberta.html'">Alberta</button>
+        </div>
+
+        <!-- British Columbia -->
+        <div class="card">
+            <img src="https://dl.dropboxusercontent.com/scl/fi/h3l70ei4h25ie7dcnoqfh/1000027303.jpg?rlkey=x3tl9ban0u3epbc8s2u9pcs82&raw=1" alt="British Columbia">
+            <button onclick="window.location.href='british-columbia.html'">British Columbia</button>
+        </div>
+
+        <!-- Manitoba -->
+        <div class="card">
+            <img src="https://www.dropbox.com/scl/fi/ir0zdpc6sj66cg4b8s7ih/1000027306.jpg?rlkey=nd6epggfpyzrbsafbj1y6pzv2&dl=1" alt="Manitoba">
+            <button onclick="window.location.href='manitoba.html'">Manitoba</button>
+        </div>
+
+        <!-- New Brunswick -->
+        <div class="card">
+            <img src="https://www.dropbox.com/scl/fi/pxuh8sihrzpa2ewn5f03r/1000027308.jpg?rlkey=ak1t38ky4ggyp0z74jp0bpp26&dl=1" alt="New Brunswick">
+            <button onclick="window.location.href='new-brunswick.html'">New Brunswick</button>
+        </div>
+
+        <!-- Newfoundland and Labrador -->
+        <div class="card">
+            <img src="https://www.dropbox.com/scl/fi/uey47nttjgv1qph4dtabz/1000027311.jpg?rlkey=iwxgzcevwiaadmdm9p13hvjs2&dl=1" alt="Newfoundland and Labrador">
+            <button onclick="window.location.href='newfoundland-labrador.html'">Newfoundland and Labrador</button>
+        </div>
+
+        <!-- Northwest Territories -->
+        <div class="card">
+            <img src="https://www.dropbox.com/scl/fi/j3f4avpak29ul2h3vovc1/1000027316.jpg?rlkey=2gzl74ocz6qim52x3lng8d6mg&dl=1" alt="Northwest Territories">
+            <button onclick="window.location.href='northwest-territories.html'">Northwest Territories</button>
+        </div>
+
+        <!-- Nova Scotia -->
+        <div class="card">
+            <img src="https://www.dropbox.com/scl/fi/4al3rxyobkij49zl4ik9v/1000027309.jpg?rlkey=pbv9qcm9p1rmlo3uu6p4716og&dl=1" alt="Nova Scotia">
+            <button onclick="window.location.href='nova-scotia.html'">Nova Scotia</button>
+        </div>
+
+        <!-- Nunavut -->
+        <div class="card">
+            <img src="https://www.dropbox.com/scl/fi/xpy345pyfkwkvbdknk75y/1000027318.jpg?rlkey=3p8s6euindlmjmv11tufc86m5&dl=1" alt="Nunavut">
+            <button onclick="window.location.href='nunavut.html'">Nunavut</button>
+        </div>
+
+        <!-- Ontario -->
+        <div class="card">
+            <img src="https://www.dropbox.com/scl/fi/yh75hh7qh920yxrn4fcsa/1000027307.jpg?rlkey=fcv8ru7zvtichv8giacd0wkxw&dl=1" alt="Ontario">
+            <button onclick="window.location.href='ontario.html'">Ontario</button>
+        </div>
+
+        <!-- Prince Edward Island -->
+        <div class="card">
+            <img src="https://www.dropbox.com/scl/fi/tqettzwgxdwtcnfsuay37/1000027310.jpg?rlkey=5b5f3jv79sdn2voggvc5lig9d&dl=1" alt="Prince Edward Island">
+            <button onclick="window.location.href='prince-edward-island.html'">Prince Edward Island</button>
+        </div>
+
+        <!-- Québec -->
+        <div class="card">
+            <img src="https://www.dropbox.com/scl/fi/2v0r2mzkjuhfrdaimqr13/1000027312.jpg?rlkey=bo2pvtccs22osmf0mf0jfn1mj&dl=1" alt="Québec">
+            <button onclick="window.location.href='quebec.html'">Québec</button>
+        </div>
+
+        <!-- Saskatchewan -->
+        <div class="card">
+            <img src="https://www.dropbox.com/scl/fi/8nh0p9lsl4uv0nloxtso9/1000027305.jpg?rlkey=h387qu5wzzu0fuwx10jur125g&dl=1" alt="Saskatchewan">
+            <button onclick="window.location.href='saskatchewan.html'">Saskatchewan</button>
+        </div>
+
+        <!-- Yukon -->
+        <div class="card">
+            <img src="https://www.dropbox.com/scl/fi/yfh5com11c4s70d42j1vr/1000027317.jpg?rlkey=x0ih9kxb2i11fyf12tp6r6d2m&dl=1" alt="Yukon">
+            <button onclick="window.location.href='yukon.html'">Yukon</button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+        <button class="nav-button" onclick="window.history.back()">← Back</button>
+        <button class="nav-button" onclick="window.history.forward()">Forward →</button>
+    </div>
+
+</body>
+</html>
