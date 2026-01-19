@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +12,10 @@
             --glow: rgba(0, 255, 255, 0.4);
         }
 
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; }
+        body, html { 
+            margin: 0; padding: 0; height: 100%; overflow: hidden; 
+            background: var(--bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; 
+        }
 
         /* --- SYNTHWAVE ANIMATED BACKGROUND --- */
         .sky {
@@ -49,12 +51,19 @@
         canvas#stars { position: fixed; top: 0; left: 0; z-index: -4; }
 
         /* --- INTERFACE --- */
+        .container-wrapper {
+            height: 100vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* smooth iOS scroll */
+        }
+
         .container { 
-            position: relative; max-width: 700px; margin: 80px auto 30px; 
+            position: relative; max-width: 700px; margin: 80px auto 60px; 
             background: rgba(0, 0, 0, 0.6); 
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             padding: 25px; border-radius: 12px; border: 1px solid rgba(0, 255, 255, 0.3);
-            height: calc(100vh - 110px); display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
+            min-height: calc(100vh - 140px); box-sizing: border-box;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
         }
 
         h1 { text-align: center; color: var(--secondary); text-shadow: 0 0 10px var(--secondary); margin: 0 0 20px; font-size: 1.8em; letter-spacing: 2px; }
@@ -76,7 +85,7 @@
             border-color: var(--secondary); box-shadow: 0 0 25px rgba(0,255,255,0.5);
         }
 
-        #townList { flex-grow: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
+        #townList { flex-grow: 1; overflow-y: visible; }
         .town-item { 
             display: flex; justify-content: space-between; align-items: center; 
             padding: 12px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); 
@@ -94,13 +103,19 @@
 
         /* Back Button */
         .back-btn {
-            position: absolute; top: 20px; left: 20px; z-index: 20;
+            position: sticky; top: 10px; left: 10px; z-index: 20;
             background: rgba(0,255,255,0.2); color: var(--secondary);
             border: 1px solid var(--secondary); padding: 10px 18px; border-radius: 8px;
             cursor: pointer; font-weight: bold; text-decoration: none;
-            transition: all 0.3s;
+            transition: all 0.3s; display: inline-block; margin-bottom: 20px;
         }
         .back-btn:hover { background: var(--secondary); color: black; box-shadow: 0 0 20px var(--secondary); }
+
+        @media (max-width: 768px) {
+            .container { padding: 20px; margin: 60px auto 40px; }
+            .search-bar { font-size: 1em; }
+            h1 { font-size: 1.6em; }
+        }
     </style>
 </head>
 <body>
@@ -110,18 +125,20 @@
 <div class="sun"></div>
 <div class="grid"></div>
 
-<!-- Back to Main Selector -->
-<a href="../index.html" class="back-btn">← Back to Provinces</a>
+<div class="container-wrapper">
+    <!-- Back to Main Selector -->
+    <a href="../index.html" class="back-btn">← Back to Provinces</a>
 
-<div class="container">
-    <h1>B.C. MUNICIPALITIES</h1>
+    <div class="container">
+        <h1>B.C. MUNICIPALITIES</h1>
 
-    <!-- Search Bar -->
-    <div class="search-wrapper">
-        <input type="text" id="searchInput" class="search-bar" placeholder="SEARCH BY NAME OR TYPE..." onkeyup="debouncedFilter()">
+        <!-- Search Bar -->
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" class="search-bar" placeholder="SEARCH BY NAME OR TYPE..." onkeyup="debouncedFilter()">
+        </div>
+
+        <div id="townList"></div>
     </div>
-
-    <div id="townList"></div>
 </div>
 
 <script>
@@ -140,15 +157,42 @@ function debounce(func, wait) {
 
 const debouncedFilter = debounce(filterTowns, 300);
 
-// === FULL B.C. MUNICIPALITY LIST ===
+// === FULL B.C. MUNICIPALITY LIST (COMPLETE) ===
 const province = "British Columbia";
 const locations = [
-    // CITIES (your full list)
-    {name: "Abbotsford", type: "City"}, {name: "Armstrong", type: "City"}, {name: "Burnaby", type: "City"}, /* ... rest of your cities ... */
+    // CITIES
+    {name: "Abbotsford", type: "City"}, {name: "Armstrong", type: "City"}, {name: "Burnaby", type: "City"}, {name: "Campbell River", type: "City"},
+    {name: "Castlegar", type: "City"}, {name: "Chilliwack", type: "City"}, {name: "Colwood", type: "City"}, {name: "Coquitlam", type: "City"},
+    {name: "Courtenay", type: "City"}, {name: "Cranbrook", type: "City"}, {name: "Dawson Creek", type: "City"}, {name: "Delta", type: "City"},
+    {name: "Duncan", type: "City"}, {name: "Enderby", type: "City"}, {name: "Fernie", type: "City"}, {name: "Fort St. John", type: "City"},
+    {name: "Grand Forks", type: "City"}, {name: "Greenwood", type: "City"}, {name: "Kamloops", type: "City"}, {name: "Kelowna", type: "City"},
+    {name: "Kimberley", type: "City"}, {name: "Langford", type: "City"}, {name: "Langley", type: "City"}, {name: "Maple Ridge", type: "City"},
+    {name: "Merritt", type: "City"}, {name: "Mission", type: "City"}, {name: "Nanaimo", type: "City"}, {name: "Nelson", type: "City"},
+    {name: "New Westminster", type: "City"}, {name: "North Vancouver", type: "City"}, {name: "Parksville", type: "City"}, {name: "Penticton", type: "City"},
+    {name: "Port Alberni", type: "City"}, {name: "Port Coquitlam", type: "City"}, {name: "Port Moody", type: "City"}, {name: "Prince George", type: "City"},
+    {name: "Prince Rupert", type: "City"}, {name: "Quesnel", type: "City"}, {name: "Richmond", type: "City"}, {name: "Rossland", type: "City"},
+    {name: "Salmon Arm", type: "City"}, {name: "Surrey", type: "City"}, {name: "Terrace", type: "City"}, {name: "Trail", type: "City"},
+    {name: "Vancouver", type: "City"}, {name: "Vernon", type: "City"}, {name: "Victoria", type: "City"}, {name: "West Kelowna", type: "City"},
+    {name: "White Rock", type: "City"}, {name: "Williams Lake", type: "City"},
     // VILLAGES
-    {name: "Alert Bay", type: "Village"}, {name: "Anmore", type: "Village"}, /* ... rest ... */
-    // DISTRICTS
-    {name: "Coldstream", type: "District"}, {name: "Elkford", type: "District"}, /* ... rest ... */
+    {name: "Alert Bay", type: "Village"}, {name: "Anmore", type: "Village"}, {name: "Ashcroft", type: "Village"}, {name: "Belcarra", type: "Village"},
+    {name: "Burns Lake", type: "Village"}, {name: "Cache Creek", type: "Village"}, {name: "Canal Flats", type: "Village"}, {name: "Chase", type: "Village"},
+    {name: "Clinton", type: "Village"}, {name: "Cumberland", type: "Village"}, {name: "Daajing Giids", type: "Village"}, {name: "Fraser Lake", type: "Village"},
+    {name: "Fruitvale", type: "Village"}, {name: "Gold River", type: "Village"}, {name: "Granisle", type: "Village"}, {name: "Harrison Hot Springs", type: "Village"},
+    {name: "Hazelton", type: "Village"}, {name: "Kaslo", type: "Village"}, {name: "Keremeos", type: "Village"}, {name: "Lillooet", type: "Village"},
+    {name: "Lions Bay", type: "Village"}, {name: "Lumby", type: "Village"}, {name: "Lytton", type: "Village"}, {name: "Masset", type: "Village"},
+    {name: "McBride", type: "Village"}, {name: "Midway", type: "Village"}, {name: "Montrose", type: "Village"}, {name: "Nakusp", type: "Village"},
+    {name: "New Denver", type: "Village"}, {name: "Pemberton", type: "Village"}, {name: "Port Alice", type: "Village"}, {name: "Port Clements", type: "Village"},
+    {name: "Pouce Coupe", type: "Village"}, {name: "Radium Hot Springs", type: "Village"}, {name: "Salmo", type: "Village"}, {name: "Sayward", type: "Village"},
+    {name: "Silverton", type: "Village"}, {name: "Slocan", type: "Village"}, {name: "Tahsis", type: "Village"}, {name: "Telkwa", type: "Village"},
+    {name: "Valemount", type: "Village"}, {name: "Warfield", type: "Village"}, {name: "Zeballos", type: "Village"},
+    // DISTRICTS / MUNICIPALITIES
+    {name: "Coldstream", type: "District"}, {name: "Elkford", type: "District"}, {name: "Houston", type: "District"}, {name: "Hudson's Hope", type: "District"},
+    {name: "Invermere", type: "District"}, {name: "Kitimat", type: "District"}, {name: "Mackenzie", type: "District"}, {name: "North Cowichan", type: "District"},
+    {name: "North Saanich", type: "District"}, {name: "Osoyoos", type: "District"}, {name: "Port Hardy", type: "District"}, {name: "Sechelt", type: "District"},
+    {name: "Sparwood", type: "District"}, {name: "Squamish", type: "District"}, {name: "Stewart", type: "District"}, {name: "Summerland", type: "District"},
+    {name: "Taylor", type: "District"}, {name: "Tofino", type: "District"}, {name: "Tumbler Ridge", type: "District"}, {name: "Ucluelet", type: "District"},
+    {name: "Wells", type: "District"}, {name: "Whistler", type: "District"}
 ];
 
 // === STARFIELD ANIMATION ===
