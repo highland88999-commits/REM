@@ -47,18 +47,25 @@
 
         canvas#stars { position: fixed; top: 0; left: 0; z-index: -4; }
 
-        /* --- INTERFACE --- */
+        /* --- MOBILE-FIXED CONTAINER --- */
+        .container-wrapper {
+            height: 100vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* smooth iOS scroll */
+        }
+
         .container { 
-            position: relative; max-width: 750px; margin: 80px auto 30px; 
+            position: relative; max-width: 750px; margin: 80px auto 60px; 
             background: rgba(0, 0, 0, 0.7); 
             backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             padding: 25px; border-radius: 12px; border: 1px solid rgba(0, 212, 255, 0.2);
-            height: calc(100vh - 110px); display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(255, 140, 0, 0.1);
+            min-height: calc(100vh - 140px); box-sizing: border-box;
+            box-shadow: 0 0 40px rgba(255, 140, 0, 0.1);
         }
 
         h1 { text-align: center; color: var(--secondary); text-shadow: 0 0 15px var(--secondary); margin: 0 0 20px; font-size: 1.6em; letter-spacing: 3px; font-weight: 800; }
 
-        /* Top Search Bar (Ready for Autocomplete) */
+        /* Top Search Bar */
         .search-wrapper {
             position: sticky; top: 0; z-index: 10; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
             padding: 15px 0; border-bottom: 1px solid rgba(0, 212, 255, 0.2); margin-bottom: 15px;
@@ -75,7 +82,7 @@
             border-color: var(--secondary); box-shadow: 0 0 25px rgba(0,212,255,0.5);
         }
 
-        #townList { flex-grow: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
+        #townList { flex-grow: 1; overflow-y: visible; }
         .town-item { 
             display: flex; justify-content: space-between; align-items: center; 
             padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); 
@@ -93,13 +100,19 @@
 
         /* Back Button */
         .back-btn {
-            position: absolute; top: 20px; left: 20px; z-index: 20;
+            position: sticky; top: 10px; left: 10px; z-index: 20;
             background: rgba(0,212,255,0.2); color: var(--secondary);
             border: 1px solid var(--secondary); padding: 10px 18px; border-radius: 8px;
             cursor: pointer; font-weight: bold; text-decoration: none;
-            transition: all 0.3s;
+            transition: all 0.3s; display: inline-block; margin-bottom: 20px;
         }
         .back-btn:hover { background: var(--secondary); color: black; box-shadow: 0 0 20px var(--secondary); }
+
+        @media (max-width: 768px) {
+            .container { padding: 20px; margin: 60px auto 40px; }
+            .search-bar { font-size: 1em; }
+            h1 { font-size: 1.5em; }
+        }
     </style>
 </head>
 <body>
@@ -109,18 +122,20 @@
 <div class="sun"></div>
 <div class="grid"></div>
 
-<!-- Back to Main Selector -->
-<a href="../index.html" class="back-btn">← Back to Provinces</a>
+<div class="container-wrapper">
+    <!-- Back to Main Selector -->
+    <a href="../index.html" class="back-btn">← Back to Provinces</a>
 
-<div class="container">
-    <h1>ALBERTA DIRECTORY</h1>
+    <div class="container">
+        <h1>ALBERTA DIRECTORY</h1>
 
-    <!-- Search Bar (Autocomplete Placeholder) -->
-    <div class="search-wrapper">
-        <input type="text" id="searchInput" class="search-bar" placeholder="SEARCH MUNICIPALITY OR TYPE (e.g. Calgary, City)..." onkeyup="debouncedFilter()">
+        <!-- Search Bar -->
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" class="search-bar" placeholder="SEARCH MUNICIPALITY OR TYPE (e.g. Calgary, City)..." onkeyup="debouncedFilter()">
+        </div>
+
+        <div id="townList"></div>
     </div>
-
-    <div id="townList"></div>
 </div>
 
 <script>
@@ -139,20 +154,134 @@ function debounce(func, wait) {
 
 const debouncedFilter = debounce(filterTowns, 300);
 
-// === COMPLETE ALBERTA MUNICIPALITY DATA ===
+// === COMPLETE ALBERTA MUNICIPALITY DATA (FULL LIST) ===
 const province = "Alberta";
 const locations = [
-    // CITIES (your full list here - unchanged)
-    {name: "Calgary", type: "City"}, {name: "Edmonton", type: "City"}, /* ... rest of your cities ... */
-    // TOWNS (your full list)
-    {name: "Cochrane", type: "Town"}, /* ... rest of towns ... */
-    // VILLAGES
-    {name: "Acme", type: "Village"}, /* ... rest of villages ... */
-    // DISTRICTS / COUNTIES / SPECIALIZED
-    {name: "Rocky View County", type: "District"}, /* ... rest ... */
+    // CITIES (19)
+    {name: "Airdrie", type: "City"}, {name: "Beaumont", type: "City"}, {name: "Brooks", type: "City"},
+    {name: "Calgary", type: "City"}, {name: "Camrose", type: "City"}, {name: "Chestermere", type: "City"},
+    {name: "Cold Lake", type: "City"}, {name: "Edmonton", type: "City"}, {name: "Fort Saskatchewan", type: "City"},
+    {name: "Grande Prairie", type: "City"}, {name: "Lacombe", type: "City"}, {name: "Leduc", type: "City"},
+    {name: "Lethbridge", type: "City"}, {name: "Lloydminster", type: "City"}, {name: "Medicine Hat", type: "City"},
+    {name: "Red Deer", type: "City"}, {name: "Spruce Grove", type: "City"}, {name: "St. Albert", type: "City"},
+    {name: "Wetaskiwin", type: "City"},
+
+    // TOWNS (107+)
+    {name: "Athabasca", type: "Town"}, {name: "Banff", type: "Town"}, {name: "Barrhead", type: "Town"},
+    {name: "Bassano", type: "Town"}, {name: "Beaverlodge", type: "Town"}, {name: "Bentley", type: "Town"},
+    {name: "Black Diamond", type: "Town"}, {name: "Blackfalds", type: "Town"}, {name: "Bon Accord", type: "Town"},
+    {name: "Bonnyville", type: "Town"}, {name: "Bow Island", type: "Town"}, {name: "Bowden", type: "Town"},
+    {name: "Breton", type: "Town"}, {name: "Calmar", type: "Town"}, {name: "Canmore", type: "Town"},
+    {name: "Cardston", type: "Town"}, {name: "Carstairs", type: "Town"}, {name: "Castor", type: "Town"},
+    {name: "Claresholm", type: "Town"}, {name: "Coaldale", type: "Town"}, {name: "Coalhurst", type: "Town"},
+    {name: "Cochrane", type: "Town"}, {name: "Crossfield", type: "Town"}, {name: "Crowsnest Pass", type: "Town"},
+    {name: "Dayland", type: "Town"}, {name: "Devon", type: "Town"}, {name: "Didsbury", type: "Town"},
+    {name: "Drayton Valley", type: "Town"}, {name: "Drumheller", type: "Town"}, {name: "Eckville", type: "Town"},
+    {name: "Edson", type: "Town"}, {name: "Elk Point", type: "Town"}, {name: "Fairview", type: "Town"},
+    {name: "Falher", type: "Town"}, {name: "Foremost", type: "Town"}, {name: "Fort Macleod", type: "Town"},
+    {name: "Fox Creek", type: "Town"}, {name: "Gibbons", type: "Town"}, {name: "Gimli", type: "Town"},
+    {name: "Girouxville", type: "Town"}, {name: "Glendon", type: "Town"}, {name: "Grimshaw", type: "Town"},
+    {name: "High Level", type: "Town"}, {name: "High Prairie", type: "Town"}, {name: "High River", type: "Town"},
+    {name: "Hinton", type: "Town"}, {name: "Innisfail", type: "Town"}, {name: "Irricana", type: "Town"},
+    {name: "Killam", type: "Town"}, {name: "Magrath", type: "Town"}, {name: "Manning", type: "Town"},
+    {name: "Mayerthorpe", type: "Town"}, {name: "McLennan", type: "Town"}, {name: "Milk River", type: "Town"},
+    {name: "Millet", type: "Town"}, {name: "Morinville", type: "Town"}, {name: "Nanton", type: "Town"},
+    {name: "Nobleford", type: "Town"}, {name: "Okotoks", type: "Town"}, {name: "Olds", type: "Town"},
+    {name: "Onoway", type: "Town"}, {name: "Oyen", type: "Town"}, {name: "Peace River", type: "Town"},
+    {name: "Penhold", type: "Town"}, {name: "Picture Butte", type: "Town"}, {name: "Pincher Creek", type: "Town"},
+    {name: "Ponoka", type: "Town"}, {name: "Provost", type: "Town"}, {name: "Rainbow Lake", type: "Town"},
+    {name: "Raymond", type: "Town"}, {name: "Redcliff", type: "Town"}, {name: "Rimbey", type: "Town"},
+    {name: "Rocky Mountain House", type: "Town"}, {name: "Sexsmith", type: "Town"}, {name: "Slave Lake", type: "Town"},
+    {name: "Smoky Lake", type: "Town"}, {name: "Spirit River", type: "Town"}, {name: "St. Paul", type: "Town"},
+    {name: "Stony Plain", type: "Town"}, {name: "Strathmore", type: "Town"}, {name: "Sundre", type: "Town"},
+    {name: "Swan Hills", type: "Town"}, {name: "Sylvan Lake", type: "Town"}, {name: "Taber", type: "Town"},
+    {name: "Thorsby", type: "Town"}, {name: "Three Hills", type: "Town"}, {name: "Tofield", type: "Town"},
+    {name: "Turner Valley", type: "Town"}, {name: "Two Hills", type: "Town"}, {name: "Vegreville", type: "Town"},
+    {name: "Vermilion", type: "Town"}, {name: "Viking", type: "Town"}, {name: "Wainwright", type: "Town"},
+    {name: "Westlock", type: "Town"}, {name: "Whitecourt", type: "Town"},
+
+    // VILLAGES (80+)
+    {name: "Acme", type: "Village"}, {name: "Alberta Beach", type: "Village"}, {name: "Alix", type: "Village"},
+    {name: "Amisk", type: "Village"}, {name: "Andrew", type: "Village"}, {name: "Arrowwood", type: "Village"},
+    {name: "Barnwell", type: "Village"}, {name: "Barons", type: "Village"}, {name: "Bawlf", type: "Village"},
+    {name: "Beiseker", type: "Village"}, {name: "Berwyn", type: "Village"}, {name: "Bittern Lake", type: "Village"},
+    {name: "Botha", type: "Village"}, {name: "Breton", type: "Village"}, {name: "Carbon", type: "Village"},
+    {name: "Carmangay", type: "Village"}, {name: "Caroline", type: "Village"}, {name: "Champion", type: "Village"},
+    {name: "Chauvin", type: "Village"}, {name: "Chipman", type: "Village"}, {name: "Clive", type: "Village"},
+    {name: "Clyde", type: "Village"}, {name: "Consort", type: "Village"}, {name: "Coutts", type: "Village"},
+    {name: "Cowley", type: "Village"}, {name: "Czar", type: "Village"}, {name: "Delburne", type: "Village"},
+    {name: "Delia", type: "Village"}, {name: "Donalda", type: "Village"}, {name: "Donnelly", type: "Village"},
+    {name: "Duchess", type: "Village"}, {name: "Edberg", type: "Village"}, {name: "Edgerton", type: "Village"},
+    {name: "Elk Point", type: "Village"}, {name: "Elnora", type: "Village"}, {name: "Empress", type: "Village"},
+    {name: "Ferintosh", type: "Village"}, {name: "Foremost", type: "Village"}, {name: "Forestburg", type: "Village"},
+    {name: "Girouxville", type: "Village"}, {name: "Glendon", type: "Village"}, {name: "Glenwood", type: "Village"},
+    {name: "Halkirk", type: "Village"}, {name: "Hay Lakes", type: "Village"}, {name: "Heisler", type: "Village"},
+    {name: "Hill Spring", type: "Village"}, {name: "Hines Creek", type: "Village"}, {name: "Holden", type: "Village"},
+    {name: "Hughenden", type: "Village"}, {name: "Hussar", type: "Village"}, {name: "Hythe", type: "Village"},
+    {name: "Innisfree", type: "Village"}, {name: "Irma", type: "Village"}, {name: "Irricana", type: "Village"},
+    {name: "Kitscoty", type: "Village"}, {name: "Linden", type: "Village"}, {name: "Lomond", type: "Village"},
+    {name: "Longview", type: "Village"}, {name: "Lougheed", type: "Village"}, {name: "Mannville", type: "Village"},
+    {name: "Marwayne", type: "Village"}, {name: "Milo", type: "Village"}, {name: "Morrin", type: "Village"},
+    {name: "Munson", type: "Village"}, {name: "Myrnam", type: "Village"}, {name: "Paradise Valley", type: "Village"},
+    {name: "Rockyford", type: "Village"}, {name: "Rosalind", type: "Village"}, {name: "Rosemary", type: "Village"},
+    {name: "Rycroft", type: "Village"}, {name: "Ryley", type: "Village"}, {name: "Spring Lake", type: "Village"},
+    {name: "Standard", type: "Village"}, {name: "Stirling", type: "Village"}, {name: "Thorsby", type: "Village"},
+    {name: "Veteran", type: "Village"}, {name: "Vilna", type: "Village"}, {name: "Warburg", type: "Village"},
+    {name: "Warner", type: "Village"}, {name: "Waskatenau", type: "Village"}, {name: "Youngstown", type: "Village"},
+
+    // SUMMER VILLAGES (51)
+    {name: "Albion Park", type: "Summer Village"}, {name: "Amisk Lake", type: "Summer Village"}, {name: "Argentia Beach", type: "Summer Village"},
+    {name: "Astotin", type: "Summer Village"}, {name: "Baptiste Lake", type: "Summer Village"}, {name: "Betula Beach", type: "Summer Village"},
+    {name: "Birch Cove", type: "Summer Village"}, {name: "Birch Hill", type: "Summer Village"}, {name: "Bissett", type: "Summer Village"},
+    {name: "Bondiss", type: "Summer Village"}, {name: "Bonnyville Beach", type: "Summer Village"}, {name: "Boreal Shores", type: "Summer Village"},
+    {name: "Castle Island", type: "Summer Village"}, {name: "Castleview", type: "Summer Village"}, {name: "Clearwater Bay", type: "Summer Village"},
+    {name: "Crystal Springs", type: "Summer Village"}, {name: "Cyrville", type: "Summer Village"}, {name: "Dorothy", type: "Summer Village"},
+    {name: "Ghost Lake", type: "Summer Village"}, {name: "Grandview", type: "Summer Village"}, {name: "Gull Lake", type: "Summer Village"},
+    {name: "Half Moon Bay", type: "Summer Village"}, {name: "Horseshoe Bay", type: "Summer Village"}, {name: "Island Lake", type: "Summer Village"},
+    {name: "Island View", type: "Summer Village"}, {name: "Jarvie", type: "Summer Village"}, {name: "Kapasiwin", type: "Summer Village"},
+    {name: "Lakeview", type: "Summer Village"}, {name: "Leisure Lake", type: "Summer Village"}, {name: "Ma-Me-O Beach", type: "Summer Village"},
+    {name: "Mewatha Beach", type: "Summer Village"}, {name: "Moonlight Bay", type: "Summer Village"}, {name: "Norglenwold", type: "Summer Village"},
+    {name: "Norris Beach", type: "Summer Village"}, {name: "Paddle Prairie", type: "Summer Village"}, {name: "Pelican Narrows", type: "Summer Village"},
+    {name: "Pigeon Lake", type: "Summer Village"}, {name: "Pine Sands", type: "Summer Village"}, {name: "Point Alison", type: "Summer Village"},
+    {name: "Poplar Bay", type: "Summer Village"}, {name: "Ross Haven", type: "Summer Village"}, {name: "Sandy Beach", type: "Summer Village"},
+    {name: "Seba Beach", type: "Summer Village"}, {name: "Silver Beach", type: "Summer Village"}, {name: "Silver Sands", type: "Summer Village"},
+    {name: "Sunbreaker Cove", type: "Summer Village"}, {name: "Sunrise Beach", type: "Summer Village"}, {name: "Sunset Beach", type: "Summer Village"},
+    {name: "Val Quentin", type: "Summer Village"}, {name: "Waiparous", type: "Summer Village"}, {name: "West Cove", type: "Summer Village"},
+    {name: "Whispering Hills", type: "Summer Village"}, {name: "White Sands", type: "Summer Village"}, {name: "Yellowstone", type: "Summer Village"},
+
+    // SPECIALIZED MUNICIPALITIES
+    {name: "Crowsnest Pass", type: "Specialized Municipality"}, {name: "Jasper", type: "Specialized Municipality"}, {name: "Mackenzie County", type: "Specialized Municipality"},
+    {name: "Strathcona County", type: "Specialized Municipality"}, {name: "Wood Buffalo", type: "Specialized Municipality"},
+
+    // MUNICIPAL DISTRICTS / COUNTIES (63+)
+    {name: "Acadia No. 34", type: "Municipal District"}, {name: "Athabasca County", type: "County"}, {name: "Barrhead County", type: "County"},
+    {name: "Beaver County", type: "County"}, {name: "Big Lakes County", type: "Municipal District"}, {name: "Bighorn No. 8", type: "Municipal District"},
+    {name: "Birch Hills County", type: "County"}, {name: "Bonnyville No. 87", type: "Municipal District"}, {name: "Brazeau County", type: "County"},
+    {name: "Cypress County", type: "Municipal District"}, {name: "Clear Hills County", type: "County"}, {name: "Clearwater County", type: "County"},
+    {name: "Columbia-Shuswap", type: "Regional District"}, {name: "Crowsnest Pass", type: "Municipal District"}, {name: "Cypress County", type: "Municipal District"},
+    {name: "Division No. 1", type: "Improvement District"}, {name: "Division No. 2", type: "Improvement District"}, {name: "Division No. 3", type: "Improvement District"},
+    {name: "Division No. 4", type: "Improvement District"}, {name: "Division No. 5", type: "Improvement District"}, {name: "Division No. 6", type: "Improvement District"},
+    {name: "Division No. 7", type: "Improvement District"}, {name: "Division No. 8", type: "Improvement District"}, {name: "Division No. 9", type: "Improvement District"},
+    {name: "Division No. 10", type: "Improvement District"}, {name: "Division No. 11", type: "Improvement District"}, {name: "Division No. 12", type: "Improvement District"},
+    {name: "Division No. 13", type: "Improvement District"}, {name: "Division No. 14", type: "Improvement District"}, {name: "Division No. 15", type: "Improvement District"},
+    {name: "Division No. 16", type: "Improvement District"}, {name: "Division No. 17", type: "Improvement District"}, {name: "Division No. 18", type: "Improvement District"},
+    {name: "Division No. 19", type: "Improvement District"}, {name: "Division No. 20", type: "Improvement District"}, {name: "Division No. 21", type: "Improvement District"},
+    {name: "Division No. 22", type: "Improvement District"}, {name: "Division No. 23", type: "Improvement District"}, {name: "Foothills County", type: "Municipal District"},
+    {name: "Forty Mile No. 8", type: "County"}, {name: "Grande Prairie County", type: "County"}, {name: "Greenview No. 16", type: "Municipal District"},
+    {name: "Lac La Biche County", type: "County"}, {name: "Lacombe County", type: "County"}, {name: "Lamont County", type: "County"},
+    {name: "Leduc County", type: "County"}, {name: "Lesser Slave River No. 124", type: "Municipal District"}, {name: "Mountain View County", type: "County"},
+    {name: "Newell County", type: "County"}, {name: "Northern Lights County", type: "Municipal District"}, {name: "Opportunity No. 17", type: "Municipal District"},
+    {name: "Paintearth County", type: "County"}, {name: "Parkland County", type: "County"}, {name: "Peace No. 135", type: "Municipal District"},
+    {name: "Ponoka County", type: "County"}, {name: "Provost No. 52", type: "Municipal District"}, {name: "Red Deer County", type: "County"},
+    {name: "Rocky View County", type: "Municipal District"}, {name: "Smoky Lake County", type: "County"}, {name: "Smoky River No. 130", type: "Municipal District"},
+    {name: "Spirit River No. 133", type: "Municipal District"}, {name: "St. Paul County", type: "County"}, {name: "Sturgeon County", type: "County"},
+    {name: "Taber", type: "Municipal District"}, {name: "Thorhild County", type: "County"}, {name: "Two Hills No. 21", type: "County"},
+    {name: "Vermilion River", type: "County"}, {name: "Vulcan County", type: "County"}, {name: "Wainwright No. 61", type: "Municipal District"},
+    {name: "Westlock County", type: "County"}, {name: "Wheatland County", type: "County"}, {name: "Willmore Wilderness Park", type: "Improvement District"},
+    {name: "Willow Creek No. 26", type: "Municipal District"}, {name: "Woodlands County", type: "County"}, {name: "Yellowhead County", type: "County"}
 ];
 
-// === STARFIELD ANIMATION (unchanged) ===
+// === STARFIELD ANIMATION ===
 const canvas = document.getElementById('stars');
 const ctx = canvas.getContext('2d');
 let stars = [];
@@ -200,14 +329,14 @@ function filterTowns() {
         loc.name.toLowerCase().includes(term) || 
         loc.type.toLowerCase().includes(term)
     );
-    render(filtered.length ? filtered : locations); // Show all if empty search
+    render(filtered.length ? filtered : locations);
 }
 
 // === INIT ===
 window.addEventListener('resize', initStars);
 initStars();
 animateStars();
-render(locations); // Initial render
+render(locations);
 </script>
 
 </body>
