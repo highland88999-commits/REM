@@ -1,1 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ontario Municipality Directory</title>
+    <style>
+        :root { 
+            --primary: #bc13fe; /* Neon Purple */
+            --secondary: #ffae00; /* Golden Horseshoe Gold */
+            --accent: #00f2ff; /* Cyber Blue */
+            --bg: #050010; 
+            --glow: rgba(188, 19, 254, 0.4);
+        }
 
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Segoe UI', sans-serif; color: white; }
+
+        /* --- MEGACITY SYNTHWAVE BACKGROUND --- */
+        .sky {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60%;
+            background: linear-gradient(to bottom, #050010 0%, #1a0033 50%, #bc13fe22 100%);
+            z-index: -3;
+        }
+
+        .sun {
+            position: fixed; bottom: 30%; left: 50%; transform: translateX(-50%);
+            width: min(320px, 65vw); height: min(320px, 65vw); 
+            background: linear-gradient(var(--secondary), var(--primary));
+            border-radius: 50%; box-shadow: 0 0 50px var(--primary); z-index: -2;
+            mask-image: linear-gradient(to bottom, black 50%, transparent 52%, black 54%, transparent 56%, black 58%, transparent 60%, black 62%);
+            animation: sunPulse 5s ease-in-out infinite;
+        }
+
+        @keyframes sunPulse { 0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); } 50% { opacity: 0.8; transform: translateX(-50%) scale(1.03); } }
+
+        .grid {
+            position: fixed; bottom: 0; left: -50%; width: 200%; height: 50%;
+            background-image: 
+                linear-gradient(0deg, transparent 24%, var(--accent) 25%, var(--accent) 26%, transparent 27%, transparent 74%, var(--accent) 75%, var(--accent) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, var(--accent) 25%, var(--accent) 26%, transparent 27%, transparent 74%, var(--accent) 75%, var(--accent) 76%, transparent 77%, transparent);
+            background-size: 45px 45px;
+            transform: perspective(250px) rotateX(65deg);
+            animation: gridFlow 2s linear infinite;
+            z-index: -1; opacity: 0.15;
+        }
+
+        @keyframes gridFlow { from { background-position: 0 0; } to { background-position: 0 45px; } }
+
+        canvas#stars { position: fixed; top: 0; left: 0; z-index: -4; }
+
+        /* --- INTERFACE --- */
+        .container { 
+            position: relative; max-width: 750px; margin: 80px auto 30px; 
+            background: rgba(5, 0, 16, 0.8); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            padding: 25px; border-radius: 12px; border: 1px solid rgba(188, 19, 254, 0.3);
+            height: calc(100vh - 110px); display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(188, 19, 254, 0.1);
+        }
+
+        h1 { text-align: center; color: var(--secondary); text-shadow: 0 0 15px var(--secondary); margin: 0 0 20px; font-size: 1.8em; letter-spacing: 4px; font-weight: 900; }
+
+        /* Top Search Bar */
+        .search-wrapper {
+            position: sticky; top: 0; z-index: 10; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+            padding: 15px 0; border-bottom: 1px solid rgba(188, 19, 254, 0.2); margin-bottom: 15px;
+        }
+
+        .search-bar { 
+            width: 100%; padding: 14px 18px; background: rgba(0,0,0,0.6); 
+            border: 2px solid var(--primary); border-radius: 12px; color: white; 
+            font-size: 1.1em; outline: none; box-shadow: 0 0 15px rgba(188,19,254,0.3);
+            transition: all 0.3s;
+        }
+
+        .search-bar:focus {
+            border-color: var(--accent); box-shadow: 0 0 25px rgba(0,242,255,0.5);
+        }
+
+        #townList { flex-grow: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
+        .town-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); 
+            transition: background 0.2s;
+        }
+        .town-item:hover { background: rgba(188,19,254,0.08); }
+        .type-tag { font-size: 0.6em; padding: 2px 8px; border-radius: 4px; background: rgba(0, 242, 255, 0.1); color: var(--accent); border: 1px solid var(--accent); margin-top: 5px; display: inline-block; text-transform: uppercase; letter-spacing: 1px; }
+
+        .map-btn { 
+            background: var(--primary); color: white; text-decoration: none; 
+            padding: 8px 16px; border-radius: 6px; font-size: 0.85em; font-weight: bold;
+            box-shadow: 0 0 12px var(--primary); transition: 0.3s;
+        }
+        .map-btn:hover { background: var(--secondary); color: black; box-shadow: 0 0 20px var(--secondary); }
+
+        /* Back Button */
+        .back-btn {
+            position: absolute; top: 20px; left: 20px; z-index: 20;
+            background: rgba(188,19,254,0.2); color: var(--primary);
+            border: 1px solid var(--primary); padding: 10px 18px; border-radius: 8px;
+            cursor: pointer; font-weight: bold; text-decoration: none;
+            transition: all 0.3s;
+        }
+        .back-btn:hover { background: var(--accent); color: black; box-shadow: 0 0 20px var(--accent); }
+    </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="sky"></div>
+<div class="sun"></div>
+<div class="grid"></div>
+
+<!-- Back to Main Selector -->
+<a href="../index.html" class="back-btn">← Back to Provinces</a>
+
+<div class="container">
+    <h1>ONTARIO DIRECTORY</h1>
+
+    <!-- Search Bar -->
+    <div class="search-wrapper">
+        <input type="text" id="searchInput" class="search-bar" placeholder="SEARCH TORONTO, OTTAWA, REGIONS..." onkeyup="debouncedFilter()">
+    </div>
+
+    <div id="townList"></div>
+</div>
+
+<script>
+// === DEBOUNCE FOR SMOOTH SEARCH ===
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+const debouncedFilter = debounce(filterTowns, 300);
+
+// === FULL ONTARIO MUNICIPALITIES ===
+const province = "Ontario";
+const locations = [
+    // MAJOR CITIES (Single-tier)
+    {name: "Toronto", type: "City"}, {name: "Ottawa", type: "City"}, {name: "Hamilton", type: "City"}, {name: "London", type: "City"}, {name: "Windsor", type: "City"}, {name: "Kingston", type: "City"}, {name: "Greater Sudbury", type: "City"}, {name: "Guelph", type: "City"}, {name: "Barrie", type: "City"}, {name: "Thunder Bay", type: "City"}, {name: "Peterborough", type: "City"}, {name: "Sault Ste. Marie", type: "City"}, {name: "Kawartha Lakes", type: "City"}, {name: "Brantford", type: "City"}, {name: "Belleville", type: "City"},
+    // REGIONAL MUNICIPALITIES (Upper-tier)
+    {name: "Peel Region", type: "Region"}, {name: "York Region", type: "Region"}, {name: "Durham Region", type: "Region"}, {name: "Halton Region", type: "Region"}, {name: "Waterloo Region", type: "Region"}, {name: "Niagara Region", type: "Region"},
+    // MAJOR LOWER-TIER CITIES
+    {name: "Mississauga", type: "City (Peel)"}, {name: "Brampton", type: "City (Peel)"}, {name: "Vaughan", type: "City (York)"}, {name: "Markham", type: "City (York)"}, {name: "Kitchener", type: "City (Waterloo)"}, {name: "Cambridge", type: "City (Waterloo)"}, {name: "Waterloo", type: "City (Waterloo)"}, {name: "Oakville", type: "Town (Halton)"}, {name: "Burlington", type: "City (Halton)"}, {name: "Oshawa", type: "City (Durham)"}, {name: "Whitby", type: "Town (Durham)"}, {name: "St. Catharines", type: "City (Niagara)"}, {name: "Niagara Falls", type: "City (Niagara)"},
+    // NORTHERN & RURAL TOWNS
+    {name: "North Bay", type: "City"}, {name: "Timmins", type: "City"}, {name: "Orillia", type: "City"}, {name: "Woodstock", type: "City"}, {name: "Stratford", type: "City"}, {name: "Cornwall", type: "City"}, {name: "Brockville", type: "City"}, {name: "Owen Sound", type: "City"}, {name: "Kenora", type: "City"}, {name: "Collingwood", type: "Town"}, {name: "Huntsville", type: "Town"}, {name: "Gravenhurst", type: "Town"}, {name: "Fort Frances", type: "Town"}, {name: "Cobourg", type: "Town"}
+];
+
+// === STARFIELD ANIMATION ===
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function initStars() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    stars = [];
+    for(let i=0; i<200; i++) {
+        stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.5, speed: Math.random()*0.25 });
+    }
+}
+
+function animateStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white";
+    stars.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
+        ctx.fill();
+        s.y += s.speed;
+        if(s.y > canvas.height) s.y = 0;
+    });
+    requestAnimationFrame(animateStars);
+}
+
+// === RENDER TOWNS ===
+function render(data) {
+    const list = document.getElementById('townList');
+    list.innerHTML = data.map(item => `
+        <div class="town-item">
+            <div>
+                <div style="font-weight:600; font-size: 1.1em;">${item.name}</div>
+                <div class="type-tag">${item.type}</div>
+            </div>
+            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ', ' + province + ', Canada')}" target="_blank" class="map-btn">VIEW MAP</a>
+        </div>
+    `).join('');
+}
+
+// === FILTER FUNCTION ===
+function filterTowns() {
+    const term = document.getElementById('searchInput').value.toLowerCase().trim();
+    const filtered = locations.filter(loc => 
+        loc.name.toLowerCase().includes(term) || 
+        loc.type.toLowerCase().includes(term)
+    );
+    render(filtered.length ? filtered : locations);
+}
+
+// === INIT ===
+window.addEventListener('resize', initStars);
+initStars();
+animateStars();
+render(locations);
+</script>
+
+</body>
+</html>
