@@ -1,1 +1,220 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Northwest Territories Community Directory</title>
+    <style>
+        :root { 
+            --primary: #ffffff; /* Diamond White */
+            --secondary: #a855f7; /* Aurora Purple */
+            --accent: #22c55e; /* Tundra Green */
+            --bg: #030712; 
+            --glow: rgba(168, 85, 247, 0.4);
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Segoe UI', sans-serif; color: white; }
+
+        /* --- ARCTIC FRONTIER BACKGROUND --- */
+        .sky {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60%;
+            background: linear-gradient(to bottom, #030712 0%, #1e1b4b 50%, #22c55e11 100%);
+            z-index: -3;
+        }
+
+        .sun {
+            position: fixed; bottom: 30%; left: 50%; transform: translateX(-50%);
+            width: min(300px, 60vw); height: min(300px, 60vw); 
+            background: linear-gradient(var(--secondary), var(--accent));
+            border-radius: 50%; box-shadow: 0 0 40px var(--secondary); z-index: -2;
+            mask-image: linear-gradient(to bottom, black 50%, transparent 52%, black 54%, transparent 56%, black 58%, transparent 60%, black 62%);
+            animation: sunPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes sunPulse { 0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); } 50% { opacity: 0.7; transform: translateX(-50%) scale(1.05); } }
+
+        .grid {
+            position: fixed; bottom: 0; left: -50%; width: 200%; height: 50%;
+            background-image: 
+                linear-gradient(0deg, transparent 24%, var(--primary) 25%, var(--primary) 26%, transparent 27%, transparent 74%, var(--primary) 75%, var(--primary) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, var(--primary) 25%, var(--primary) 26%, transparent 27%, transparent 74%, var(--primary) 75%, var(--primary) 76%, transparent 77%, transparent);
+            background-size: 60px 60px;
+            transform: perspective(300px) rotateX(65deg);
+            animation: gridFlow 5s linear infinite;
+            z-index: -1; opacity: 0.1;
+        }
+
+        @keyframes gridFlow { from { background-position: 0 0; } to { background-position: 0 60px; } }
+
+        canvas#stars { position: fixed; top: 0; left: 0; z-index: -4; }
+
+        /* --- INTERFACE --- */
+        .container { 
+            position: relative; max-width: 700px; margin: 80px auto 30px; 
+            background: rgba(3, 7, 18, 0.85); 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 25px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);
+            height: calc(100vh - 110px); display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(168, 85, 247, 0.1);
+        }
+
+        h1 { text-align: center; color: var(--primary); text-shadow: 0 0 15px var(--primary); margin: 0 0 20px; font-size: 1.6em; letter-spacing: 5px; font-weight: 900; }
+
+        /* Top Search Bar */
+        .search-wrapper {
+            position: sticky; top: 0; z-index: 10; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+            padding: 15px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 15px;
+        }
+
+        .search-bar { 
+            width: 100%; padding: 12px 18px; background: rgba(255,255,255,0.05); 
+            border: 2px solid var(--secondary); border-radius: 10px; color: white; 
+            font-size: 1.1em; outline: none; box-shadow: 0 0 15px rgba(168,85,247,0.3);
+            transition: all 0.3s;
+        }
+
+        .search-bar:focus {
+            border-color: var(--accent); box-shadow: 0 0 25px rgba(34,197,94,0.5);
+        }
+
+        #townList { flex-grow: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--secondary) transparent; }
+        .town-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+            transition: background 0.2s;
+        }
+        .town-item:hover { background: rgba(168,85,247,0.08); }
+        .type-tag { font-size: 0.6em; padding: 2px 8px; border-radius: 4px; background: rgba(34, 197, 94, 0.1); color: var(--accent); border: 1px solid var(--accent); margin-top: 4px; display: inline-block; text-transform: uppercase; letter-spacing: 1px; }
+
+        .map-btn { 
+            background: var(--secondary); color: white; text-decoration: none; 
+            padding: 8px 16px; border-radius: 4px; font-size: 0.8em; font-weight: bold;
+            box-shadow: 0 0 10px var(--secondary); transition: 0.3s;
+        }
+        .map-btn:hover { background: var(--primary); color: var(--bg); box-shadow: 0 0 20px var(--primary); }
+
+        /* Back Button */
+        .back-btn {
+            position: absolute; top: 20px; left: 20px; z-index: 20;
+            background: rgba(168,85,247,0.2); color: var(--secondary);
+            border: 1px solid var(--secondary); padding: 10px 18px; border-radius: 8px;
+            cursor: pointer; font-weight: bold; text-decoration: none;
+            transition: all 0.3s;
+        }
+        .back-btn:hover { background: var(--accent); color: black; box-shadow: 0 0 20px var(--accent); }
+    </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="sky"></div>
+<div class="sun"></div>
+<div class="grid"></div>
+
+<!-- Back to Main Selector -->
+<a href="../index.html" class="back-btn">← Back to Provinces</a>
+
+<div class="container">
+    <h1>NORTHWEST TERRITORIES</h1>
+
+    <!-- Search Bar -->
+    <div class="search-wrapper">
+        <input type="text" id="searchInput" class="search-bar" placeholder="SEARCH YELLOWKNIFE, INUVIK, HAMLETS..." onkeyup="debouncedFilter()">
+    </div>
+
+    <div id="townList"></div>
+</div>
+
+<script>
+// === DEBOUNCE FOR SMOOTH SEARCH ===
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+const debouncedFilter = debounce(filterTowns, 300);
+
+// === FULL NWT COMMUNITIES ===
+const province = "Northwest Territories";
+const locations = [
+    // CITY
+    {name: "Yellowknife", type: "City"},
+    // TOWNS
+    {name: "Fort Smith", type: "Town"}, {name: "Hay River", type: "Town"}, {name: "Inuvik", type: "Town"}, {name: "Norman Wells", type: "Town"},
+    // VILLAGE
+    {name: "Fort Simpson", type: "Village"},
+    // CHARTER COMMUNITIES
+    {name: "Délı̨nę", type: "Charter Community"}, {name: "Fort Good Hope", type: "Charter Community"}, {name: "Tsiigehtchic", type: "Charter Community"},
+    // COMMUNITY GOVERNMENTS (Tłı̨chǫ)
+    {name: "Behchokǫ̀", type: "Community Government"}, {name: "Gamèti", type: "Community Government"}, {name: "Wekweètì", type: "Community Government"}, {name: "Whatì", type: "Community Government"},
+    // HAMLETS
+    {name: "Aklavik", type: "Hamlet"}, {name: "Enterprise", type: "Hamlet"}, {name: "Fort Liard", type: "Hamlet"}, {name: "Fort McPherson", type: "Hamlet"}, {name: "Fort Providence", type: "Hamlet"}, {name: "Fort Resolution", type: "Hamlet"}, {name: "Paulatuk", type: "Hamlet"}, {name: "Sachs Harbour", type: "Hamlet"}, {name: "Tuktoyaktuk", type: "Hamlet"}, {name: "Tulita", type: "Hamlet"}, {name: "Ulukhaktok", type: "Hamlet"}
+];
+
+// === STARFIELD ANIMATION ===
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function initStars() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    stars = [];
+    for(let i=0; i<120; i++) {
+        stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.5, speed: Math.random()*0.1 });
+    }
+}
+
+function animateStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white";
+    stars.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
+        ctx.fill();
+        s.y += s.speed;
+        if(s.y > canvas.height) s.y = 0;
+    });
+    requestAnimationFrame(animateStars);
+}
+
+// === RENDER COMMUNITIES ===
+function render(data) {
+    const list = document.getElementById('townList');
+    list.innerHTML = data.map(item => `
+        <div class="town-item">
+            <div>
+                <div style="font-weight:600; font-size: 1.1em;">${item.name}</div>
+                <div class="type-tag">${item.type}</div>
+            </div>
+            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ', ' + province + ', Canada')}" target="_blank" class="map-btn">MAP</a>
+        </div>
+    `).join('');
+}
+
+// === FILTER FUNCTION ===
+function filterTowns() {
+    const term = document.getElementById('searchInput').value.toLowerCase().trim();
+    const filtered = locations.filter(loc => 
+        loc.name.toLowerCase().includes(term) || 
+        loc.type.toLowerCase().includes(term)
+    );
+    render(filtered.length ? filtered : locations);
+}
+
+// === INIT ===
+window.addEventListener('resize', initStars);
+initStars();
+animateStars();
+render(locations);
+</script>
+
+</body>
+</html>
