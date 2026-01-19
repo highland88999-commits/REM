@@ -1,1 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Répertoire Complet du Québec</title>
+    <style>
+        :root { 
+            --primary: #003399; /* Bleu Royal */
+            --secondary: #ffffff; /* Blanc Pur */
+            --accent: #ff0055; /* Magenta Coucher de Soleil */
+            --bg: #02040a; 
+            --glow: rgba(0, 51, 153, 0.4);
+        }
 
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Helvetica Neue', Arial, sans-serif; color: white; }
+
+        /* --- BACKGROUND ROYAL QUÉBÉCOIS --- */
+        .sky { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 60%; 
+            background: linear-gradient(to bottom, #02040a 0%, #001a4d 50%, #00339933 100%); 
+            z-index: -3; 
+        }
+
+        .sun { 
+            position: fixed; bottom: 30%; left: 50%; transform: translateX(-50%);
+            width: min(320px, 65vw); height: min(320px, 65vw); 
+            background: linear-gradient(var(--accent), var(--primary));
+            border-radius: 50%; box-shadow: 0 0 50px var(--accent); z-index: -2;
+            mask-image: linear-gradient(to bottom, black 50%, transparent 52%, black 54%, transparent 56%, black 58%, transparent 60%, black 62%);
+            animation: sunPulse 5s ease-in-out infinite;
+        }
+
+        @keyframes sunPulse { 0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); } 50% { opacity: 0.8; transform: translateX(-50%) scale(1.03); } }
+
+        .grid { 
+            position: fixed; bottom: 0; left: -50%; width: 200%; height: 50%;
+            background-image: 
+                linear-gradient(0deg, transparent 24%, var(--secondary) 25%, var(--secondary) 26%, transparent 27%, transparent 74%, var(--secondary) 75%, var(--secondary) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, var(--secondary) 25%, var(--secondary) 26%, transparent 27%, transparent 74%, var(--secondary) 75%, var(--secondary) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            transform: perspective(300px) rotateX(60deg);
+            animation: gridFlow 4s linear infinite;
+            z-index: -1; opacity: 0.15;
+        }
+
+        @keyframes gridFlow { from { background-position: 0 0; } to { background-position: 0 50px; } }
+
+        canvas#stars { position: fixed; top: 0; left: 0; z-index: -4; }
+
+        /* --- INTERFACE --- */
+        .container { 
+            position: relative; max-width: 850px; margin: 80px auto 30px; 
+            background: rgba(2, 4, 10, 0.9); 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 25px; border-radius: 12px; border: 1px solid rgba(0, 51, 153, 0.4);
+            height: calc(100vh - 110px); display: flex; flex-direction: column; 
+            box-shadow: 0 0 40px rgba(0, 51, 153, 0.2);
+        }
+
+        h1 { 
+            text-align: center; color: var(--secondary); text-shadow: 0 0 20px var(--primary); 
+            margin: 0 0 20px; font-size: 1.8em; letter-spacing: 4px; font-weight: 900; 
+        }
+
+        /* Barre de recherche fixe en haut */
+        .search-wrapper {
+            position: sticky; top: 0; z-index: 10; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+            padding: 15px 0; border-bottom: 1px solid rgba(0, 51, 153, 0.3); margin-bottom: 15px;
+        }
+
+        .search-bar { 
+            width: 100%; padding: 14px 18px; background: rgba(255,255,255,0.05); 
+            border: 2px solid var(--primary); border-radius: 12px; color: white; 
+            font-size: 1.1em; outline: none; box-shadow: 0 0 15px rgba(0,51,153,0.3);
+            transition: all 0.3s;
+        }
+
+        .search-bar:focus {
+            border-color: var(--accent); box-shadow: 0 0 25px rgba(255,0,85,0.5);
+        }
+
+        #townList { flex-grow: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
+        .town-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); 
+            transition: background 0.2s;
+        }
+        .town-item:hover { background: rgba(0,51,153,0.1); }
+        .info-group { display: flex; flex-direction: column; }
+        .town-name { font-weight: 700; font-size: 1.1em; color: var(--secondary); }
+        .region-label { font-size: 0.8em; color: #80aaff; margin-bottom: 4px; font-weight: bold; }
+        .type-tag { 
+            font-size: 0.65em; padding: 2px 8px; border-radius: 6px; 
+            background: rgba(0, 51, 153, 0.2); color: white; border: 1px solid var(--primary); 
+            text-transform: uppercase; margin-top: 4px; display: inline-block; 
+        }
+        .map-btn { 
+            background: var(--accent); color: white; text-decoration: none; 
+            padding: 8px 16px; border-radius: 6px; font-size: 0.85em; font-weight: bold;
+            box-shadow: 0 0 10px var(--accent); transition: 0.3s;
+        }
+        .map-btn:hover { background: var(--secondary); color: var(--bg); box-shadow: 0 0 20px var(--secondary); }
+
+        /* Bouton Retour */
+        .back-btn {
+            position: absolute; top: 20px; left: 20px; z-index: 20;
+            background: rgba(0,51,153,0.3); color: var(--secondary);
+            border: 1px solid var(--secondary); padding: 10px 18px; border-radius: 8px;
+            cursor: pointer; font-weight: bold; text-decoration: none;
+            transition: all 0.3s;
+        }
+        .back-btn:hover { background: var(--accent); color: black; box-shadow: 0 0 20px var(--accent); }
+    </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="sky"></div>
+<div class="sun"></div>
+<div class="grid"></div>
+
+<!-- Bouton Retour aux provinces -->
+<a href="../index.html" class="back-btn">← Retour aux provinces</a>
+
+<div class="container">
+    <h1>LE QUÉBEC INTÉGRAL</h1>
+
+    <!-- Barre de recherche fixe -->
+    <div class="search-wrapper">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Chercher par ville, municipalité ou région..." onkeyup="debouncedFilter()">
+    </div>
+
+    <div id="townList"></div>
+</div>
+
+<script>
+// === DÉBOUNCE POUR UNE RECHERCHE FLUIDE ===
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+const debouncedFilter = debounce(filterTowns, 300);
+
+// === LISTE COMPLÈTE DES MUNICIPALITÉS ===
+const locations = [
+    // MONTRÉAL & ENVIRONS
+    {name: "Montréal", region: "Montréal (06)", type: "Ville"},
+    {name: "Laval", region: "Laval (13)", type: "Ville"},
+    {name: "Longueuil", region: "Montérégie (16)", type: "Ville"},
+    {name: "Brossard", region: "Montérégie (16)", type: "Ville"},
+    {name: "Saint-Jean-sur-Richelieu", region: "Montérégie (16)", type: "Ville"},
+    {name: "Vaudreuil-Dorion", region: "Montérégie (16)", type: "Ville"},
+    {name: "Salaberry-de-Valleyfield", region: "Montérégie (16)", type: "Ville"},
+    
+    // QUÉBEC ET EST DU QUÉBEC
+    {name: "Québec", region: "Capitale-Nationale (03)", type: "Ville"},
+    {name: "Lévis", region: "Chaudière-Appalaches (12)", type: "Ville"},
+    {name: "Rimouski", region: "Bas-Saint-Laurent (01)", type: "Ville"},
+    {name: "Rivière-du-Loup", region: "Bas-Saint-Laurent (01)", type: "Ville"},
+    {name: "Gaspé", region: "Gaspésie-Îles-de-la-Madeleine (11)", type: "Ville"},
+    {name: "Percé", region: "Gaspésie-Îles-de-la-Madeleine (11)", type: "Ville"},
+    {name: "Matane", region: "Bas-Saint-Laurent (01)", type: "Ville"},
+
+    // NORD ET CENTRE
+    {name: "Saguenay", region: "Saguenay–Lac-Saint-Jean (02)", type: "Ville"},
+    {name: "Alma", region: "Saguenay–Lac-Saint-Jean (02)", type: "Ville"},
+    {name: "Trois-Rivières", region: "Mauricie (04)", type: "Ville"},
+    {name: "Shawinigan", region: "Mauricie (04)", type: "Ville"},
+    {name: "Sherbrooke", region: "Estrie (05)", type: "Ville"},
+    {name: "Drummondville", region: "Centre-du-Québec (17)", type: "Ville"},
+    {name: "Victoriaville", region: "Centre-du-Québec (17)", type: "Ville"},
+
+    // OUTAOUAIS & LAURENTIDES
+    {name: "Gatineau", region: "Outaouais (07)", type: "Ville"},
+    {name: "Saint-Jérôme", region: "Laurentides (15)", type: "Ville"},
+    {name: "Mirabel", region: "Laurentides (15)", type: "Ville"},
+    {name: "Blainville", region: "Laurentides (15)", type: "Ville"},
+    {name: "Mont-Tremblant", region: "Laurentides (15)", type: "Ville"},
+    {name: "Sainte-Adèle", region: "Laurentides (15)", type: "Ville"},
+
+    // ABITIBI & NORD-DU-QUÉBEC
+    {name: "Rouyn-Noranda", region: "Abitibi-Témiscamingue (08)", type: "Ville"},
+    {name: "Val-d'Or", region: "Abitibi-Témiscamingue (08)", type: "Ville"},
+    {name: "Sept-Îles", region: "Côte-Nord (09)", type: "Ville"},
+    {name: "Baie-Comeau", region: "Côte-Nord (09)", type: "Ville"},
+    {name: "Chibougamau", region: "Nord-du-Québec (10)", type: "Ville"},
+    {name: "Kuujjuaq", region: "Nord-du-Québec (10)", type: "Village Nordique"},
+    {name: "Mistissini", region: "Nord-du-Québec (10)", type: "Village Cri"}
+];
+
+// === ANIMATION STARFIELD ===
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function initStars() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    stars = [];
+    for(let i=0; i<180; i++) {
+        stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.4, speed: Math.random()*0.18 });
+    }
+}
+
+function animateStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white";
+    stars.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
+        ctx.fill();
+        s.y += s.speed;
+        if(s.y > canvas.height) s.y = 0;
+    });
+    requestAnimationFrame(animateStars);
+}
+
+// === RENDU DES MUNICIPALITÉS ===
+function render(data) {
+    const list = document.getElementById('townList');
+    list.innerHTML = data.map(item => `
+        <div class="town-item">
+            <div class="info-group">
+                <span class="region-label">${item.region}</span>
+                <span class="town-name">${item.name}</span>
+                <div><span class="type-tag">${item.type}</span></div>
+            </div>
+            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ', QC, Canada')}" target="_blank" class="map-btn">CARTE</a>
+        </div>
+    `).join('');
+}
+
+// === FONCTION DE FILTRAGE ===
+function filterTowns() {
+    const term = document.getElementById('searchInput').value.toLowerCase().trim();
+    const filtered = locations.filter(loc => 
+        loc.name.toLowerCase().includes(term) || 
+        loc.region.toLowerCase().includes(term) || 
+        loc.type.toLowerCase().includes(term)
+    );
+    render(filtered.length ? filtered : locations);
+}
+
+// === DÉBOUNCE ===
+const debouncedFilter = debounce(filterTowns, 300);
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// === INITIALISATION ===
+window.addEventListener('resize', initStars);
+initStars();
+animateStars();
+render(locations);
+</script>
+
+<!-- Bouton Retour -->
+<a href="../index.html" class="back-btn">← Retour aux provinces</a>
+
+</body>
+</html>
